@@ -57,6 +57,8 @@
   .score-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
   .score { font-family: var(--mono); font-size: 28px; font-weight: 600; }
   .score.good { color: var(--good); } .score.warn { color: var(--warn); } .score.bad { color: var(--bad); }
+  .suggest-box { margin-top: 16px; padding: 12px 14px; border: 1px solid var(--warn); border-radius: 8px; background: rgba(212, 167, 44, 0.08); font-size: 14px; }
+  .suggest-box a { display: block; margin-top: 6px; font-family: var(--mono); font-size: 12px; word-break: break-all; }
   .badge-box { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); display: none; }
   .badge-box img { display: block; margin-bottom: 10px; }
   textarea.snippet {
@@ -147,9 +149,14 @@ function render(report, url) {
   const encoded = b64url(url);
   const badgeUrl = window.location.origin + '/api/badge/' + encoded;
   const mdSnippet = '[![x402 status](' + badgeUrl + ')](' + window.location.origin + '/?u=' + encodeURIComponent(url) + ')';
+  const suggestHtml = report.suggestion
+    ? '<div class="suggest-box">This URL doesn\'t look payable, but ' + escapeHtml(report.suggestion.manifestUrl) + ' lists ' + report.suggestion.paidEndpoints.length + ' paid endpoint(s) on this site - did you mean:' +
+      report.suggestion.paidEndpoints.map((u) => '<a href="?u=' + encodeURIComponent(u) + '">' + escapeHtml(u) + '</a>').join('') + '</div>'
+    : '';
   resultEl.innerHTML =
     '<div class="score-row"><span class="score ' + scoreClass + '">' + report.score + '%</span><span class="detail">' + (report.latency_ms != null ? report.latency_ms + 'ms' : '') + '</span></div>' +
     '<ul class="checklist">' + items + '</ul>' +
+    suggestHtml +
     '<div class="badge-box" style="display:block;"><img src="' + badgeUrl + '" alt="x402 status badge" /><p class="detail" style="margin-bottom:6px;">Add this badge to your README:</p><textarea class="snippet" readonly onclick="this.select()">' + escapeHtml(mdSnippet) + '</textarea></div>';
 }
 
