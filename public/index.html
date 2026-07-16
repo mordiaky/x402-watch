@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>x402 Watch — check that your paid endpoint actually works</title>
+<meta name="description" content="Free, instant protocol check for x402 seller endpoints: does it return a valid 402 challenge, and is it discoverable in the Coinbase Bazaar catalog?" />
+<style>
+  :root {
+    --bg: #0a0e12;
+    --panel: #10161c;
+    --border: #1f2a33;
+    --text: #e6edf3;
+    --text-dim: #8b98a5;
+    --accent: #4fd1c5;
+    --accent-dim: #2a5f5a;
+    --good: #3fb950;
+    --warn: #d4a72c;
+    --bad: #e05d44;
+    --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.6;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 64px 24px 96px; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+  h1 { font-size: clamp(2rem, 5vw, 2.75rem); line-height: 1.15; letter-spacing: -.02em; margin: 12px 0 16px; }
+  .lede { color: var(--text-dim); font-size: 17px; max-width: 60ch; margin: 0 0 40px; }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  form { display: flex; gap: 10px; flex-wrap: wrap; }
+  input[type="url"] {
+    flex: 1; min-width: 220px; background: #0d1319; border: 1px solid var(--border);
+    color: var(--text); font-family: var(--mono); font-size: 14px; padding: 12px 14px; border-radius: 8px;
+  }
+  input[type="url"]:focus { outline: none; border-color: var(--accent); }
+  button {
+    background: var(--accent); color: #06201d; border: none; font-weight: 600;
+    font-size: 14px; padding: 12px 20px; border-radius: 8px; cursor: pointer;
+  }
+  button:hover { background: #6fe0d4; }
+  button:disabled { background: var(--accent-dim); color: var(--text-dim); cursor: default; }
+  #result { margin-top: 24px; display: none; }
+  .checklist { list-style: none; margin: 0; padding: 0; }
+  .checklist li { display: flex; gap: 10px; padding: 10px 0; border-top: 1px solid var(--border); font-size: 14px; }
+  .checklist li:first-child { border-top: none; }
+  .icon { flex-shrink: 0; width: 18px; text-align: center; font-family: var(--mono); }
+  .icon.pass { color: var(--good); }
+  .icon.fail { color: var(--bad); }
+  .icon.info { color: var(--text-dim); }
+  .detail { color: var(--text-dim); }
+  .score-row { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+  .score { font-family: var(--mono); font-size: 28px; font-weight: 600; }
+  .score.good { color: var(--good); } .score.warn { color: var(--warn); } .score.bad { color: var(--bad); }
+  .badge-box { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); display: none; }
+  .badge-box img { display: block; margin-bottom: 10px; }
+  textarea.snippet {
+    width: 100%; background: #0d1319; border: 1px solid var(--border); color: var(--text-dim);
+    font-family: var(--mono); font-size: 12px; padding: 10px; border-radius: 8px; resize: none; height: 44px;
+  }
+  section { margin-top: 56px; }
+  h2 { font-size: 20px; margin: 0 0 10px; }
+  .waitlist { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  input[type="email"] {
+    flex: 1; min-width: 200px; background: #0d1319; border: 1px solid var(--border);
+    color: var(--text); font-size: 14px; padding: 10px 14px; border-radius: 8px;
+  }
+  .note { font-size: 13px; color: var(--text-dim); margin-top: 10px; }
+  footer { margin-top: 72px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 13px; color: var(--text-dim); }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">x402 Watch</p>
+  <h1>Is your paid endpoint actually payable?</h1>
+  <p class="lede">Paste an x402 seller URL. We send an unpaid request and check that the 402 challenge is well-formed, and whether the endpoint shows up in the Coinbase Bazaar catalog agents actually search. No wallet, no signup, no payment sent.</p>
+
+  <div class="panel">
+    <form id="check-form">
+      <input type="url" id="url-input" placeholder="https://api.example.com/paid-endpoint" required />
+      <button type="submit" id="submit-btn">Run check</button>
+    </form>
+    <div id="result"></div>
+  </div>
+
+  <section>
+    <h2>Want it checked automatically?</h2>
+    <p class="lede" style="margin-bottom: 8px;">Hosted monitoring with email alerts when your 402 challenge breaks or your Bazaar listing drops is coming next. Leave your email and we'll let you know.</p>
+    <form id="waitlist-form" class="waitlist">
+      <input type="email" id="email-input" placeholder="you@example.com" required />
+      <button type="submit" id="waitlist-btn">Notify me</button>
+    </form>
+    <p class="note" id="waitlist-note"></p>
+  </section>
+
+  <footer>
+    Read-only checks against the Coinbase CDP public discovery API. We never send a payment or store the URLs you check.
+  </footer>
+</main>
+
+<script>
+const form = document.getElementById('check-form');
+const submitBtn = document.getElementById('submit-btn');
+const resultEl = document.getElementById('result');
+
+const ICONS = { pass: '✓', fail: '✕', info: '·' };
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const url = document.getElementById('url-input').value.trim();
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'Checking…';
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = '<p class="detail">Running checks…</p>';
+  try {
+    const res = await fetch('/api/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url }),
+    });
+    const report = await res.json();
+    if (!res.ok) {
+      resultEl.innerHTML = '<p class="detail">' + escapeHtml(report.error || 'Check failed.') + '</p>';
+      return;
+    }
+    render(report, url);
+  } catch (err) {
+    resultEl.innerHTML = '<p class="detail">Request failed: ' + escapeHtml(String(err.message || err)) + '</p>';
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Run check';
+  }
+});
+
+function render(report, url) {
+  const scoreClass = report.score === 100 ? 'good' : report.score >= 50 ? 'warn' : 'bad';
+  const items = report.checks.map((c) => {
+    const kind = c.informational ? 'info' : c.pass ? 'pass' : 'fail';
+    return '<li><span class="icon ' + kind + '">' + ICONS[kind] + '</span><span><strong>' + escapeHtml(c.name.replace(/_/g, ' ')) + '</strong><br><span class="detail">' + escapeHtml(c.detail) + '</span></span></li>';
+  }).join('');
+  const encoded = b64url(url);
+  const badgeUrl = window.location.origin + '/api/badge/' + encoded;
+  const mdSnippet = '[![x402 status](' + badgeUrl + ')](' + window.location.origin + '/?u=' + encodeURIComponent(url) + ')';
+  resultEl.innerHTML =
+    '<div class="score-row"><span class="score ' + scoreClass + '">' + report.score + '%</span><span class="detail">' + (report.latency_ms != null ? report.latency_ms + 'ms' : '') + '</span></div>' +
+    '<ul class="checklist">' + items + '</ul>' +
+    '<div class="badge-box" style="display:block;"><img src="' + badgeUrl + '" alt="x402 status badge" /><p class="detail" style="margin-bottom:6px;">Add this badge to your README:</p><textarea class="snippet" readonly onclick="this.select()">' + escapeHtml(mdSnippet) + '</textarea></div>';
+}
+
+function b64url(str) {
+  return btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+}
+
+const waitlistForm = document.getElementById('waitlist-form');
+const waitlistBtn = document.getElementById('waitlist-btn');
+const waitlistNote = document.getElementById('waitlist-note');
+waitlistForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('email-input').value.trim();
+  waitlistBtn.disabled = true;
+  try {
+    const res = await fetch('/api/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    waitlistNote.textContent = res.ok ? "You're on the list." : (data.error || 'Something went wrong.');
+    if (res.ok) waitlistForm.reset();
+  } catch {
+    waitlistNote.textContent = 'Something went wrong. Try again shortly.';
+  } finally {
+    waitlistBtn.disabled = false;
+  }
+});
+
+const prefill = new URLSearchParams(window.location.search).get('u');
+if (prefill) document.getElementById('url-input').value = prefill;
+</script>
+</body>
+</html>
