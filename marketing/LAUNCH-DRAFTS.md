@@ -1,13 +1,15 @@
 # Launch drafts - DRAFT ONLY, nothing has been posted
 
-Both drafts below are ready to use once x402 Watch has a real deployed URL.
-Neither has been submitted or posted anywhere - that's your call to make and
-your account to post from.
+Both drafts are ready to use as-is. Neither has been submitted or posted
+anywhere - that's your call to make and your account to post from.
 
-Prerequisites before either goes out:
-- [ ] x402-watch deployed to a real URL (the empty Vercel project
-      `x402-watch` already exists under the team - see chat summary)
-- [ ] x402-seller-starter pushed to a public GitHub repo (currently local-only)
+Live links (deployed 2026-07-16):
+- x402 Watch: https://x402-watch-eight.vercel.app
+- x402 Watch source: https://github.com/mordiaky/x402-watch
+- x402 seller starter source: https://github.com/mordiaky/x402-seller-starter
+
+Remaining before posting:
+- [ ] Consider a nicer domain than the `*.vercel.app` one for x402 Watch (optional)
 - [ ] Decide: post from a personal account/handle, or a project one?
 
 ---
@@ -19,7 +21,7 @@ Prerequisites before either goes out:
 Show HN: x402 Watch – check if your agentic-payment endpoint actually works
 ```
 
-**URL:** the deployed x402-watch homepage.
+**URL:** https://x402-watch-eight.vercel.app
 
 **First comment (post this yourself right after submitting - HN convention
 for "Show HN" is the submitter adds context in the first comment):**
@@ -128,7 +130,7 @@ search?
 That second part only happens after your first real settled payment. No
 separate registration. A lot of sellers don't know that.
 
-[link]
+https://x402-watch-eight.vercel.app
 ```
 
 **Tweet 8:**
@@ -137,7 +139,7 @@ Also built the seller starter Vercel never replaced after archiving theirs
 in December: a minimal Next.js + Coinbase CDP reference for standing up a
 paid endpoint from scratch.
 
-[link]
+https://github.com/mordiaky/x402-seller-starter
 ```
 
 **Tweet 9 (close):**
@@ -145,7 +147,7 @@ paid endpoint from scratch.
 Both free, both open source. VouchSpec is still live and still selling
 receipts for $0.25 if any agent out there wants to be buyer #1.
 
-[VouchSpec link]
+https://vouchspec.plyrium.com
 ```
 
 ---
